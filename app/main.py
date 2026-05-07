@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 
 from app.core.config import settings
 from app.core.database import check_db_connection
-from app.routers import auth, configuracion, planificaciones, telegram
+from app.routers import auth, configuracion, planificaciones, telegram, desarrollo
 # ---------------------------------------------------------------------------
 # Lifespan: código que corre al iniciar y apagar la app
 # ---------------------------------------------------------------------------
@@ -71,6 +71,8 @@ app.include_router(configuracion.router, prefix="/api/config", tags=["Configurac
 app.include_router(planificaciones.router, prefix="/api/planificaciones", tags=["Planificaciones"])
 
 app.include_router(telegram.router, prefix="/api/telegram", tags=["Telegram"])
+
+app.include_router(desarrollo.router, prefix="/api/desarrollo", tags=["Desarrollo Diario"])
 
 # ---------------------------------------------------------------------------
 # Health check (útil para Render y para el webhook de Telegram)

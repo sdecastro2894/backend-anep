@@ -1,1 +1,319 @@
-<h1>Docente App</h1> 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docente App</title>
+  <link rel="stylesheet" href="/static/css/app.css" />
+</head>
+<body>
+
+  <!-- ===== LOGIN / REGISTRO ===== -->
+  <div id="auth-section">
+    <div class="auth-card">
+      <h1>📚 Docente App</h1>
+      <p class="subtitle">Gestión y planificación para docentes de Uruguay</p>
+
+      <div class="tab-auth">
+        <button class="tab-btn active" onclick="showAuthTab('login')">Ingresar</button>
+        <button class="tab-btn" onclick="showAuthTab('registro')">Registrarse</button>
+      </div>
+
+      <!-- Login -->
+      <div id="login-form">
+        <input type="email" id="login-email" placeholder="Email" />
+        <input type="password" id="login-password" placeholder="Contraseña" />
+        <button class="btn-primary" onclick="login()">Ingresar</button>
+      </div>
+
+      <!-- Registro -->
+      <div id="registro-form" style="display:none">
+        <input type="text" id="reg-nombre" placeholder="Nombre completo" />
+        <input type="email" id="reg-email" placeholder="Email" />
+        <input type="password" id="reg-password" placeholder="Contraseña (mín. 8 caracteres)" />
+        <button class="btn-primary" onclick="registro()">Crear cuenta</button>
+      </div>
+
+      <div id="auth-error" class="error-msg" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ===== APP PRINCIPAL ===== -->
+  <div id="app-section" style="display:none">
+
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <span class="logo">📚 Docente App</span>
+        <span id="header-nombre" class="header-user"></span>
+      </div>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </header>
+
+    <!-- Tabs principales -->
+    <nav class="main-tabs">
+      <button class="main-tab active" onclick="showTab('config')">⚙️ Configuración</button>
+      <button class="main-tab" onclick="showTab('planificaciones')">📋 Planificaciones</button>
+      <button class="main-tab" onclick="showTab('desarrollo')">📝 Desarrollo Diario</button>
+    </nav>
+
+    <!-- ===== TAB 1: CONFIGURACIÓN ===== -->
+    <div id="tab-config" class="tab-content">
+
+      <!-- Sub-tabs -->
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="showSubTab('config', 'grupos')">Grupos</button>
+        <button class="sub-tab" onclick="showSubTab('config', 'asignaciones')">Asignaciones</button>
+        <button class="sub-tab" onclick="showSubTab('config', 'archivos')">Archivos</button>
+        <button class="sub-tab" onclick="showSubTab('config', 'perfil')">Mi Perfil</button>
+      </div>
+
+      <!-- Grupos -->
+      <div id="subtab-config-grupos" class="subtab-content">
+        <div class="section-header">
+          <h2>Mis Grupos</h2>
+          <button class="btn-primary" onclick="showModal('modal-grupo')">+ Nuevo Grupo</button>
+        </div>
+        <div id="lista-grupos" class="card-grid"></div>
+      </div>
+
+      <!-- Asignaciones -->
+      <div id="subtab-config-asignaciones" class="subtab-content" style="display:none">
+        <div class="section-header">
+          <h2>Mis Asignaciones</h2>
+          <button class="btn-primary" onclick="showModal('modal-asignacion')">+ Nueva Asignación</button>
+        </div>
+        <div id="lista-asignaciones" class="card-grid"></div>
+      </div>
+
+      <!-- Archivos -->
+      <div id="subtab-config-archivos" class="subtab-content" style="display:none">
+        <div class="section-header">
+          <h2>Archivos Base</h2>
+        </div>
+        <div class="upload-area">
+          <h3>Subir archivo</h3>
+          <select id="archivo-tipo">
+            <option value="anep_pdf">Programa ANEP (PDF)</option>
+            <option value="anep_word">Programa ANEP (Word)</option>
+            <option value="anep_txt">Programa ANEP (TXT)</option>
+            <option value="ficha_docente">Ficha del docente</option>
+          </select>
+          <select id="archivo-asignacion">
+            <option value="">Global (todas las asignaciones)</option>
+          </select>
+          <input type="file" id="archivo-file" accept=".pdf,.docx,.doc,.txt" />
+          <button class="btn-primary" onclick="subirArchivo()">Subir archivo</button>
+          <div id="upload-status" class="info-msg" style="display:none"></div>
+        </div>
+        <div id="lista-archivos" class="card-grid"></div>
+      </div>
+
+      <!-- Perfil -->
+      <div id="subtab-config-perfil" class="subtab-content" style="display:none">
+        <div class="profile-card">
+          <h2>Mi Perfil</h2>
+          <div id="perfil-data"></div>
+          <div class="telegram-link">
+            <h3>🤖 Vincular Telegram</h3>
+            <p>Enviá <strong>/start</strong> al bot para obtener tu chat_id y pegalo acá:</p>
+            <input type="number" id="telegram-chat-id" placeholder="Tu chat_id de Telegram" />
+            <button class="btn-primary" onclick="vincularTelegram()">Vincular</button>
+            <div id="telegram-status" class="info-msg" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== TAB 2: PLANIFICACIONES ===== -->
+    <div id="tab-planificaciones" class="tab-content" style="display:none">
+
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="showSubTab('plan', 'anual')">Planif. Anual</button>
+        <button class="sub-tab" onclick="showSubTab('plan', 'unidad')">Por Unidad</button>
+        <button class="sub-tab" onclick="showSubTab('plan', 'diaria')">Diaria</button>
+      </div>
+
+      <!-- Planificación Anual -->
+      <div id="subtab-plan-anual" class="subtab-content">
+        <div class="section-header">
+          <h2>Planificación Anual</h2>
+        </div>
+        <div class="form-planif">
+          <label>Asignación:</label>
+          <select id="plan-anual-asignacion"></select>
+          <label>Semanas lectivas:</label>
+          <input type="number" id="plan-anual-semanas" value="38" min="10" max="52" />
+          <label>% de clases para emergentes:</label>
+          <input type="number" id="plan-anual-emergentes" value="15" min="0" max="50" />
+          <label>Directivas adicionales:</label>
+          <textarea id="plan-anual-directivas" rows="3" placeholder="Indicaciones específicas para Gemini..."></textarea>
+          <button class="btn-primary btn-gemini" onclick="generarPlanAnual()">
+            ✨ Generar con Gemini
+          </button>
+          <div id="plan-anual-loading" class="loading" style="display:none">
+            ⏳ Generando planificación... esto puede tardar 20-30 segundos.
+          </div>
+        </div>
+        <div id="resultado-plan-anual"></div>
+        <div id="lista-plan-anual" class="card-grid"></div>
+      </div>
+
+      <!-- Planificación por Unidad -->
+      <div id="subtab-plan-unidad" class="subtab-content" style="display:none">
+        <div class="section-header">
+          <h2>Planificación por Unidad</h2>
+        </div>
+        <div class="form-planif">
+          <label>Asignación:</label>
+          <select id="plan-unidad-asignacion"></select>
+          <label>Título de la unidad:</label>
+          <input type="text" id="plan-unidad-titulo" placeholder="Ej: Ecuaciones de primer grado" />
+          <label>Horas docentes asignadas:</label>
+          <input type="number" id="plan-unidad-horas" value="10" min="1" />
+          <label>% emergentes:</label>
+          <input type="number" id="plan-unidad-emergentes" value="15" min="0" max="50" />
+          <label>
+            <input type="checkbox" id="plan-unidad-evaluacion" onchange="toggleEvaluacion()" />
+            Incluir evaluación
+          </label>
+          <div id="tipo-evaluacion-container" style="display:none">
+            <label>Tipo de evaluación:</label>
+            <select id="plan-unidad-tipo-eval">
+              <option value="formativa">Formativa</option>
+              <option value="sumativa">Sumativa</option>
+              <option value="ambas">Ambas</option>
+            </select>
+          </div>
+          <label>Objetivos (uno por línea):</label>
+          <textarea id="plan-unidad-objetivos" rows="3" placeholder="Objetivo 1&#10;Objetivo 2"></textarea>
+          <label>Contenidos (uno por línea):</label>
+          <textarea id="plan-unidad-contenidos" rows="3" placeholder="Contenido 1&#10;Contenido 2"></textarea>
+          <button class="btn-primary btn-gemini" onclick="generarPlanUnidad()">
+            ✨ Generar con Gemini
+          </button>
+          <div id="plan-unidad-loading" class="loading" style="display:none">
+            ⏳ Generando planificación de unidad...
+          </div>
+        </div>
+        <div id="resultado-plan-unidad"></div>
+      </div>
+
+      <!-- Planificación Diaria -->
+      <div id="subtab-plan-diaria" class="subtab-content" style="display:none">
+        <div class="section-header">
+          <h2>Planificación Diaria</h2>
+        </div>
+        <div class="form-planif">
+          <label>Asignación:</label>
+          <select id="plan-diaria-asignacion"></select>
+          <label>Título de la clase:</label>
+          <input type="text" id="plan-diaria-titulo" placeholder="Ej: Introducción a ecuaciones" />
+          <label>Objetivo:</label>
+          <input type="text" id="plan-diaria-objetivo" placeholder="Objetivo de la clase" />
+          <label>Contenido principal:</label>
+          <textarea id="plan-diaria-contenido" rows="2" placeholder="Qué se va a enseñar"></textarea>
+          <label>Estrategia sugerida:</label>
+          <input type="text" id="plan-diaria-estrategia" placeholder="Ej: Trabajo grupal, resolución de problemas" />
+          <label>Duración (minutos):</label>
+          <input type="number" id="plan-diaria-duracion" value="45" min="30" max="120" />
+          <label>Contexto de clases anteriores:</label>
+          <textarea id="plan-diaria-contexto" rows="2" placeholder="Resumen de lo dado anteriormente (opcional)"></textarea>
+          <button class="btn-primary btn-gemini" onclick="generarPlanDiaria()">
+            ✨ Generar con Gemini
+          </button>
+          <div id="plan-diaria-loading" class="loading" style="display:none">
+            ⏳ Generando planificación diaria...
+          </div>
+        </div>
+        <div id="resultado-plan-diaria"></div>
+      </div>
+
+    </div>
+
+    <!-- ===== TAB 3: DESARROLLO DIARIO ===== -->
+    <div id="tab-desarrollo" class="tab-content" style="display:none">
+      <div class="section-header">
+        <h2>Desarrollo Diario</h2>
+        <select id="desarrollo-asignacion" onchange="cargarDesarrollos()"></select>
+      </div>
+      <div id="lista-desarrollos"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== MODALES ===== -->
+
+  <!-- Modal Nuevo Grupo -->
+  <div id="modal-grupo" class="modal" style="display:none">
+    <div class="modal-content">
+      <h3>Nuevo Grupo</h3>
+      <input type="text" id="grupo-nombre" placeholder="Nombre (ej: 8vo D)" />
+      <input type="text" id="grupo-anio" placeholder="Año (ej: 2026)" />
+      <input type="text" id="grupo-institucion" placeholder="Institución (ej: CEC La Teja)" />
+      <div class="modal-buttons">
+        <button class="btn-secondary" onclick="hideModal('modal-grupo')">Cancelar</button>
+        <button class="btn-primary" onclick="crearGrupo()">Guardar</button>
+      </div>
+      <div id="grupo-error" class="error-msg" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Modal Nueva Asignación -->
+  <div id="modal-asignacion" class="modal" style="display:none">
+    <div class="modal-content modal-large">
+      <h3>Nueva Asignación</h3>
+      <label>Grupo:</label>
+      <select id="asig-grupo-id"></select>
+      <label>Materia:</label>
+      <input type="text" id="asig-materia" placeholder="Ej: Matemáticas" />
+      <label>Minutos por hora docente:</label>
+      <input type="number" id="asig-minutos" value="45" min="30" max="120" />
+      <label>Horario semanal:</label>
+      <div id="horario-builder">
+        <div class="horario-row" id="horario-lunes">
+          <span>Lunes</span>
+          <input type="number" min="0" max="4" value="0" class="horario-input" data-dia="Lunes" />
+          <span>bloques</span>
+        </div>
+        <div class="horario-row" id="horario-martes">
+          <span>Martes</span>
+          <input type="number" min="0" max="4" value="0" class="horario-input" data-dia="Martes" />
+          <span>bloques</span>
+        </div>
+        <div class="horario-row" id="horario-miercoles">
+          <span>Miércoles</span>
+          <input type="number" min="0" max="4" value="0" class="horario-input" data-dia="Miércoles" />
+          <span>bloques</span>
+        </div>
+        <div class="horario-row" id="horario-jueves">
+          <span>Jueves</span>
+          <input type="number" min="0" max="4" value="0" class="horario-input" data-dia="Jueves" />
+          <span>bloques</span>
+        </div>
+        <div class="horario-row" id="horario-viernes">
+          <span>Viernes</span>
+          <input type="number" min="0" max="4" value="0" class="horario-input" data-dia="Viernes" />
+          <span>bloques</span>
+        </div>
+        <div class="horario-row" id="horario-sabado">
+          <span>Sábado</span>
+          <input type="number" min="0" max="4" value="0" class="horario-input" data-dia="Sábado" />
+          <span>bloques</span>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-secondary" onclick="hideModal('modal-asignacion')">Cancelar</button>
+        <button class="btn-primary" onclick="crearAsignacion()">Guardar</button>
+      </div>
+      <div id="asig-error" class="error-msg" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Modal overlay -->
+  <div id="modal-overlay" class="modal-overlay" style="display:none" onclick="hideAllModals()"></div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
